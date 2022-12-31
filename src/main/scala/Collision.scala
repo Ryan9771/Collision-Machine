@@ -1,6 +1,7 @@
 import java.awt._
 import java.awt.event.ActionEvent
 import javax.swing._
+import scala.util.Random
 
 object Collision {
 
@@ -10,8 +11,11 @@ object Collision {
     private var v: Int = y
     private val w: Int = width
     private val hg: Int = height
-    private var speedX: Int = 7
-    private var speedY: Int = 6
+
+    val rand = new Random()
+
+    private var speedX: Int = rand.between(5, 16)
+    private var speedY: Int = rand.between(5, 16)
 
     def draw(g: Graphics): Unit = {
       g.setColor(colour)
