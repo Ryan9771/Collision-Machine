@@ -1,41 +1,82 @@
-import java.awt.{BorderLayout, Color, Dimension, FlowLayout, Graphics, Graphics2D, Rectangle}
+import java.awt._
 import java.awt.event.ActionEvent
-import javax.swing.{AbstractAction, JComponent, JFrame, JPanel, JScrollPane, JTextArea, OverlayLayout, Timer, WindowConstants}
+import javax.swing._
 
 object Collision {
 
-  class RPS(x: Int, y: Int, width: Int, height: Int, identity: String) extends JComponent {
+  class Box(x: Int, y: Int, width: Int, height: Int, colour: Color) extends Rectangle {
 
-    override def paint(g: Graphics): Unit = {
-      val g2d = g.asInstanceOf[Graphics2D]
-      if (identity.equals("Rock")) {
-        g2d.setColor(Color.BLACK)
-      } else if (identity.equals("Paper")) {
-        g2d.setColor(Color.CYAN)
-      } else {
-        g2d.setColor(Color.ORANGE)
-      }
+    private var h: Int = x
+    private var v: Int = y
+    private var w: Int = width
+    private var hg: Int = height
 
-      g.fillRect(x, y, width, height)
+    def draw(g: Graphics): Unit = {
+      g.setColor(colour)
+      g.fillRect(h, v, width, height)
     }
+
+    def shift(horizontal: Int, vertical: Int): Unit = {
+      this.h += horizontal
+      this.v += vertical
+    }
+
+    def getHoriz: Int = h
+    def getVert: Int = v
+    override def getWidth: Double = w
   }
 
-  class Frame extends JFrame {
-    val rock = new RPS(10, 100, 50, 50, "Rock")
-    val paper = new RPS(10, 300, 50, 50, "Paper")
+  class Frame(width: Int, height: Int) extends JFrame {
+
+    var rock = new Box(10,100,50,50, Color.BLUE)
+    var paper = new Box(10, 300, 50, 50, Color.GRAY)
+    setSize(width,height)
+
 
     override def paint(g: Graphics): Unit = {
-      rock.paint(g)
-      paper.paint(g)
+      var img: Image = createImage(width, height)
+      var graphics: Graphics = img.getGraphics
+      graphics.clearRect(0, 0,width,height)
+      rock.draw(graphics)
+      paper.draw(graphics)
+      g.drawImage(img, 0, 0, this)
     }
 
-    this.setSize(500, 500)
-    this.setVisible(true)
-    this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
+    setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
+    setVisible(true)
+
+    val speed = 5
+    val timer = new Timer(50, null)
+    timer.addActionListener(new AbstractAction() {
+      override def actionPerformed(e: ActionEvent): Unit = {
+
+        var rockPos = rock.getHoriz + speed + rock.getWidth
+        var paperPos = paper.getHoriz + speed + paper.getWidth
+        printf("(rockPos: %f), (paperPos: %f), (width: %f) \n", rockPos, paperPos, rock.getWidth)
+
+        if (rockPos > 0 && rockPos < width) {
+          rock.shift(speed, 0)
+        } else {
+          timer.stop()
+        }
+
+        if (paperPos > 0 && paperPos < width) {
+          paper.shift(speed, 0)
+        } else {
+          timer.stop()
+        }
+
+        repaint()
+      }
+    })
+
+    timer.start()
+
   }
 
   def main(args: Array[String]): Unit = {
-    new Frame
+    new Frame(500,500)
   }
+
 
 }
