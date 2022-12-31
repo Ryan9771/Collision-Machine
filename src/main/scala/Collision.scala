@@ -10,15 +10,25 @@ object Collision {
     private var v: Int = y
     private val w: Int = width
     private val hg: Int = height
+    private var speedX: Int = 7
+    private var speedY: Int = 6
 
     def draw(g: Graphics): Unit = {
       g.setColor(colour)
       g.fillRect(h, v, width, height)
     }
 
-    def shift(horizontal: Int, vertical: Int): Unit = {
-      this.h += horizontal
-      this.v += vertical
+    def shift(): Unit = {
+      this.h += speedX
+      this.v += speedY
+    }
+
+    def flipSpeedX(): Unit = {
+      this.speedX *= -1
+    }
+
+    def flipSpeedY(): Unit = {
+      this.speedY *= -1
     }
 
     def getHoriz: Int = h
@@ -29,16 +39,18 @@ object Collision {
 
   class Frame(width: Int, height: Int) extends JFrame {
 
-    private var rock = new Box(10,100,50,50, Color.BLUE)
-    private var paper = new Box(10, 300, 50, 50, Color.GRAY)
+    private var rock = new Box(10,100,25,25, Color.BLUE)
+    private var paper = new Box(10, 300,25, 25, Color.GRAY)
+
+    private val rpsList = Array(rock, paper)
+
     setSize(width,height)
 
     override def paint(g: Graphics): Unit = {
       val img: Image = createImage(width, height)
       val graphics: Graphics = img.getGraphics
       graphics.clearRect(0, 0,width,height)
-      rock.draw(graphics)
-      paper.draw(graphics)
+      rpsList.foreach(i => i.draw(graphics))
       g.drawImage(img, 0, 0, this)
     }
 
@@ -46,30 +58,29 @@ object Collision {
     setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
     setVisible(true)
 
-    var speedX = 7
-    var speedY = 6
     val timer = new Timer(50, null)
     timer.addActionListener(new AbstractAction() {
       override def actionPerformed(e: ActionEvent): Unit = {
 
-        rock.shift(speedX, speedY)
+        rpsList.foreach { x =>
+          x.shift()
 
-        val rockHorizEnd = rock.getHoriz + rock.getWidth
-        if (rock.getHoriz < 0 || rockHorizEnd > width) {
-          speedX *= -1
+          val xHorizEnd = x.getHoriz + x.getWidth
+          if (x.getHoriz < 0 || xHorizEnd > width) {
+            x.flipSpeedX()
+          }
+
+          val xVertEnd = x.getVert + x.getHeight
+          if (x.getVert < 10 || xVertEnd > height) {
+            x.flipSpeedY()
+          }
+
+          repaint()
         }
-
-        val rockVertEnd = rock.getVert + rock.getHeight
-        if (rock.getVert < 10 || rockVertEnd > height) {
-          speedY *= -1
-        }
-
-        repaint()
       }
     })
 
     timer.start()
-
   }
 
   def main(args: Array[String]): Unit = {
