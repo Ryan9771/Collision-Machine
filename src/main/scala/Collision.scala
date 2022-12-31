@@ -24,6 +24,7 @@ object Collision {
     def getHoriz: Int = h
     def getVert: Int = v
     override def getWidth: Double = w
+    override def getHeight: Double = hg
   }
 
   class Frame(width: Int, height: Int) extends JFrame {
@@ -32,38 +33,35 @@ object Collision {
     private var paper = new Box(10, 300, 50, 50, Color.GRAY)
     setSize(width,height)
 
-
     override def paint(g: Graphics): Unit = {
-      var img: Image = createImage(width, height)
-      var graphics: Graphics = img.getGraphics
+      val img: Image = createImage(width, height)
+      val graphics: Graphics = img.getGraphics
       graphics.clearRect(0, 0,width,height)
       rock.draw(graphics)
       paper.draw(graphics)
       g.drawImage(img, 0, 0, this)
     }
 
+    setTitle("Collision Machine")
     setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
     setVisible(true)
 
-    val speed = 5
+    var speedX = 7
+    var speedY = 6
     val timer = new Timer(50, null)
     timer.addActionListener(new AbstractAction() {
       override def actionPerformed(e: ActionEvent): Unit = {
 
-        var rockPos = rock.getHoriz + speed + rock.getWidth
-        var paperPos = paper.getHoriz + speed + paper.getWidth
-        printf("(rockPos: %f), (paperPos: %f), (width: %f) \n", rockPos, paperPos, rock.getWidth)
+        rock.shift(speedX, speedY)
 
-        if (rockPos > 0 && rockPos < width) {
-          rock.shift(speed, 0)
-        } else {
-          timer.stop()
+        val rockHorizEnd = rock.getHoriz + rock.getWidth
+        if (rock.getHoriz < 0 || rockHorizEnd > width) {
+          speedX *= -1
         }
 
-        if (paperPos > 0 && paperPos < width) {
-          paper.shift(speed, 0)
-        } else {
-          timer.stop()
+        val rockVertEnd = rock.getVert + rock.getHeight
+        if (rock.getVert < 10 || rockVertEnd > height) {
+          speedY *= -1
         }
 
         repaint()
