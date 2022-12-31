@@ -2,43 +2,41 @@ import java.awt._
 import java.awt.event.ActionEvent
 import javax.swing._
 
-object Collision {
+object test {
 
-  class Box(x: Int, y: Int, width: Int, height: Int, colour: Color) extends Rectangle {
-
-    private var h: Int = x
-    private var v: Int = y
-    private val w: Int = width
-    private val hg: Int = height
+  class Box(x: Int, y: Int, width: Int, height: Int, colour: Color) extends Rectangle(x, y, width, height) {
 
     def draw(g: Graphics): Unit = {
       g.setColor(colour)
-      g.fillRect(h, v, width, height)
+      g.fillRect(x, y, width, height)
+    }
+
+    override def setLocation(x: Int, y: Int): Unit = {
+      setBounds(x, y, width, height)
     }
 
     def shift(horizontal: Int, vertical: Int): Unit = {
-      this.h += horizontal
-      this.v += vertical
+      println(x)
+      setLocation(x + horizontal, y + vertical)
+      println(x)
     }
 
-    def getHoriz: Int = h
-    def getVert: Int = v
-    override def getWidth: Double = w
   }
 
   class Frame(width: Int, height: Int) extends JFrame {
 
     private var rock = new Box(10,100,50,50, Color.BLUE)
     private var paper = new Box(10, 300, 50, 50, Color.GRAY)
-    setSize(width,height)
+
+    setSize(width, height)
 
 
     override def paint(g: Graphics): Unit = {
       var img: Image = createImage(width, height)
       var graphics: Graphics = img.getGraphics
       graphics.clearRect(0, 0,width,height)
-      rock.draw(graphics)
-      paper.draw(graphics)
+      rock.draw(g)
+      paper.draw(g)
       g.drawImage(img, 0, 0, this)
     }
 
@@ -50,21 +48,25 @@ object Collision {
     timer.addActionListener(new AbstractAction() {
       override def actionPerformed(e: ActionEvent): Unit = {
 
-        var rockPos = rock.getHoriz + speed + rock.getWidth
-        var paperPos = paper.getHoriz + speed + paper.getWidth
-        printf("(rockPos: %f), (paperPos: %f), (width: %f) \n", rockPos, paperPos, rock.getWidth)
+        rock.shift(speed, 0)
+        paper.shift(speed, 0)
+        repaint()
 
-        if (rockPos > 0 && rockPos < width) {
-          rock.shift(speed, 0)
-        } else {
-          timer.stop()
-        }
-
-        if (paperPos > 0 && paperPos < width) {
-          paper.shift(speed, 0)
-        } else {
-          timer.stop()
-        }
+//        var rockPos = rock.getX + speed + rock.getWidth
+//        var paperPos = paper.getX + speed + paper.getWidth
+//        printf("(rockPos: %f), (paperPos: %f), (width: %f) \n", rockPos, paperPos, rock.getWidth)
+//
+//        if (rockPos > 0 && rockPos < width) {
+//          rock.shift(speed, 0)
+//        } else {
+//          timer.stop()
+//        }
+//
+//        if (paperPos > 0 && paperPos < width) {
+//          paper.shift(speed, 0)
+//        } else {
+//          timer.stop()
+//        }
 
         repaint()
       }
