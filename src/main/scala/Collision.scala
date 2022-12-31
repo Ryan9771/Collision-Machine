@@ -43,10 +43,29 @@ object Collision {
 
   class Frame(width: Int, height: Int) extends JFrame {
 
-    private var rock = new Box(10,100,25,25, Color.BLUE)
-    private var paper = new Box(10, 300,25, 25, Color.GRAY)
+    private val rpsList = new Array[Box](30)
+    val rand = new Random()
 
-    private val rpsList = Array(rock, paper)
+    var counter: Int = 0
+    for (i <- rpsList.indices) {
+      val xCord = rand.nextInt(width - 25)
+      val yCord = rand.nextInt(height - 25)
+
+      if (counter == 0) {
+        rpsList(i) = new Box(xCord, yCord, 25, 25, Color.RED)
+      } else if (counter == 1) {
+        rpsList(i) = new Box(xCord, yCord, 25, 25, Color.GREEN)
+      } else {
+        rpsList(i) = new Box(xCord, yCord, 25, 25, Color.BLUE)
+      }
+
+      if (counter < 2) {
+        counter += 1
+      } else {
+        counter = 0
+      }
+
+    }
 
     setSize(width,height)
 
