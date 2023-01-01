@@ -1,11 +1,14 @@
 import java.awt._
 import java.awt.event.ActionEvent
+import java.awt.geom.Rectangle2D
 import javax.swing._
 import scala.util.Random
 
 object Collision {
 
-  class Box(x: Int, y: Int, width: Int, height: Int, colour: Color) extends Rectangle {
+  val DIMENSION: Int = 20
+
+  class Box(x: Int, y: Int, width: Int, height: Int, var colour: Color) extends Rectangle {
 
     private var h: Int = x
     private var v: Int = y
@@ -14,8 +17,8 @@ object Collision {
 
     val rand = new Random()
 
-    private var speedX: Int = rand.between(5, 16)
-    private var speedY: Int = rand.between(5, 16)
+    private var speedX: Int = rand.between(3, 8)
+    private var speedY: Int = rand.between(3, 8)
 
     def draw(g: Graphics): Unit = {
       g.setColor(colour)
@@ -35,10 +38,35 @@ object Collision {
       this.speedY *= -1
     }
 
-    def getHoriz: Int = h
-    def getVert: Int = v
+    def changeColour(col: Color): Unit = {
+      colour = col
+    }
+
+    override def getX: Double = h
+    override def getY: Double = v
+    def getColour: Color = colour
     override def getWidth: Double = w
     override def getHeight: Double = hg
+
+    def overlaps(r: Box): Boolean = {
+
+      var tw = this.width
+      var th = this.height
+      var rw = r.getWidth
+      var rh = r.getHeight
+      if (rw <= 0 || rh <= 0 || tw <= 0 || th <= 0)
+        return false
+      val tx = this.h
+      val ty = this.v
+      val rx = r.getX
+      val ry = r.getY
+      rw += rx
+      rh += ry
+      tw += tx
+      th += ty
+      //      overflow || intersect//      overflow || intersect
+      (rw < rx || rw > tx) && (rh < ry || rh > ty) && (tw < tx || tw > rx) && (th < ty || th > ry)
+    }
   }
 
   class Frame(width: Int, height: Int) extends JFrame {
@@ -48,15 +76,15 @@ object Collision {
 
     var counter: Int = 0
     for (i <- rpsList.indices) {
-      val xCord = rand.nextInt(width - 25)
-      val yCord = rand.nextInt(height - 25)
+      val xCord = rand.nextInt(width - DIMENSION)
+      val yCord = rand.nextInt(height - DIMENSION)
 
       if (counter == 0) {
-        rpsList(i) = new Box(xCord, yCord, 25, 25, Color.RED)
+        rpsList(i) = new Box(xCord, yCord, DIMENSION, DIMENSION, Color.RED)
       } else if (counter == 1) {
-        rpsList(i) = new Box(xCord, yCord, 25, 25, Color.GREEN)
+        rpsList(i) = new Box(xCord, yCord, DIMENSION, DIMENSION, Color.GREEN)
       } else {
-        rpsList(i) = new Box(xCord, yCord, 25, 25, Color.BLUE)
+        rpsList(i) = new Box(xCord, yCord, DIMENSION, DIMENSION, Color.BLUE)
       }
 
       if (counter < 2) {
@@ -86,28 +114,62 @@ object Collision {
       override def actionPerformed(e: ActionEvent): Unit = {
 
         rpsList.foreach { x =>
+
           x.shift()
 
-          val xHorizEnd = x.getHoriz + x.getWidth
-          if (x.getHoriz < 0 || xHorizEnd > width) {
+          val xHorizEnd = x.getX + x.getWidth
+          if (x.getX < 0 || xHorizEnd > width) {
             x.flipSpeedX()
           }
 
-          val xVertEnd = x.getVert + x.getHeight
-          if (x.getVert < 10 || xVertEnd > height) {
+          val xVertEnd = x.getY + x.getHeight
+          if (x.getY < 10 || xVertEnd > height) {
             x.flipSpeedY()
           }
 
           repaint()
         }
+
+
+        //  R    P     S
+        // RED GREEN BLUE
+        for (i <- rpsList.indices) {
+          for (j <- i until rpsList.length) {
+            if (rpsList(i).overlaps(rpsList(j))) {
+
+              if (rpsList(i).getColour == Color.RED) {
+                if (rpsList(j).getColour == Color.GREEN) {
+                  rpsList(i).changeColour(Color.GREEN)
+                } else if (rpsList(j).getColour == Color.BLUE) {
+                  rpsList(j).changeColour(Color.RED)
+                }
+              } else if (rpsList(i).getColour == Color.GREEN) {
+                if (rpsList(j).getColour == Color.RED) {
+                  rpsList(j).changeColour(Color.GREEN)
+                } else if (rpsList(j).getColour == Color.BLUE) {
+                  rpsList(i).changeColour(Color.BLUE)
+                }
+              } else { // Colour is BLUE
+                if (rpsList(j).getColour == Color.RED) {
+                  rpsList(i).changeColour(Color.RED)
+                } else if (rpsList(j).getColour == Color.GREEN) {
+                  rpsList(j).changeColour(Color.BLUE)
+                }
+              }
+
+            }
+          }
+        }
       }
     })
+
+
 
     timer.start()
   }
 
   def main(args: Array[String]): Unit = {
-    new Frame(500,500)
+    new Frame(800,800)
   }
 
 
