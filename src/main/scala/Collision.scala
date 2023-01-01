@@ -1,6 +1,5 @@
 import java.awt._
 import java.awt.event.ActionEvent
-import java.awt.geom.Rectangle2D
 import javax.swing._
 import scala.util.Random
 
@@ -106,6 +105,7 @@ object Collision {
     }
 
     setTitle("Collision Machine")
+    setLocationRelativeTo(null)
     setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
     setVisible(true)
 
@@ -128,6 +128,15 @@ object Collision {
           }
 
           repaint()
+        }
+
+        if (!rpsList.exists(i => rpsList(0).getColour != i.getColour)) {
+          timer.stop()
+          rpsList(0).getColour match {
+            case Color.RED => setTitle("RED has WON!!")
+            case Color.GREEN => setTitle("GREEN has WON")
+            case _ => setTitle("BLUE has WON!")
+          }
         }
 
 
