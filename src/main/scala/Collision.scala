@@ -153,7 +153,9 @@ object Collision {
     // Sets the size of the screen
     setSize(width,height)
 
-    // paint method that is responsible for drawing the screen, along with each Box object on the screen
+    /**
+     * Responsible for drawing the screen, along with each Box object on the screen.
+     */
     override def paint(g: Graphics): Unit = {
       val img: Image = createImage(width, height)
       val graphics: Graphics = img.getGraphics
